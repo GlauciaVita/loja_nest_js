@@ -5,7 +5,7 @@ import { UsuarioEntity } from './usuario.entity';
 export class UsuarioRepository {
   private usuarios: UsuarioEntity[] = [];
 
-  salvar(usuario: UsuarioEntity) {
+  async salvar(usuario: UsuarioEntity) {
     this.usuarios.push(usuario);
   }
 
@@ -52,7 +52,6 @@ export class UsuarioRepository {
     this.usuarios = this.usuarios.filter(
       (usuarioSalvo) => usuarioSalvo.id !== id,
     );
-
     return usuario;
   }
 }

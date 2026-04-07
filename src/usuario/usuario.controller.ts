@@ -1,8 +1,18 @@
-import { Body, Controller, Get, Post, Delete, Param } from '@nestjs/common';
-import { UsuarioRepository } from './usuario.repository';
-import { CriaUsuarioDTO } from './CriaUsuarioDTO';
-import { UsuarioEntity } from './usuario.entity';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { v4 as uuid } from 'uuid';
+import { AtualizaUsuarioDTO } from './dto/AtualizaUsuario.dto';
+import { CriaUsuarioDTO } from './dto/CriaUsuario.dto';
+import { ListaUsuarioDTO } from './dto/ListaUsuario.dto';
+import { UsuarioEntity } from './usuario.entity';
+import { UsuarioRepository } from './usuario.repository';
 
 @Controller('/usuarios')
 export class UsuarioController {
@@ -17,15 +27,37 @@ export class UsuarioController {
     usuarioEntity.id = uuid();
 
     this.usuarioRepository.salvar(usuarioEntity);
+
     return {
-      id: usuarioEntity.id,
-      mensagem: 'usuário criado com sucesso',
+      usuario: new ListaUsuarioDTO(usuarioEntity.id, usuarioEntity.nome),
+      messagem: 'usuário criado com sucesso',
     };
   }
 
   @Get()
-  async listarUsuarios() {
-    return { usuarios: await this.usuarioRepository.listar() };
+  async listUsuarios() {
+    const usuariosSalvos = await this.usuarioRepository.listar();
+    const usuariosLista = usuariosSalvos.map(
+      (usuario) => new ListaUsuarioDTO(usuario.id, usuario.nome),
+    );
+
+    return usuariosLista;
+  }
+
+  @Put('/:id')
+  async atualizaUsuario(
+    @Param('id') id: string,
+    @Body() novosDados: AtualizaUsuarioDTO,
+  ) {
+    const usuarioAtualizado = await this.usuarioRepository.atualiza(
+      id,
+      novosDados,
+    );
+
+    return {
+      usuario: usuarioAtualizado,
+      messagem: 'usuário atualizado com sucesso',
+    };
   }
 
   @Delete('/:id')
@@ -34,7 +66,7 @@ export class UsuarioController {
 
     return {
       usuario: usuarioRemovido,
-      mensagem: 'usuário removido com sucesso',
+      messagem: 'usuário removido com suceso',
     };
   }
 }
